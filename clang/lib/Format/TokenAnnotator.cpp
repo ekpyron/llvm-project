@@ -6216,10 +6216,13 @@ bool TokenAnnotator::canBreakBefore(const AnnotatedLine &Line,
 
   // We only break before r_paren if we're in a block indented context.
   if (Right.is(tok::r_paren)) {
-    if (Style.AlignAfterOpenBracket != FormatStyle::BAS_BlockIndent ||
+    if ((Style.AlignAfterOpenBracket != FormatStyle::BAS_BlockIndent &&
+         Style.AlignAfterOpenBracket != FormatStyle::BAS_AlwaysBlockIndent) ||
         !Right.MatchingParen) {
       return false;
     }
+    if (Style.AlignAfterOpenBracket == FormatStyle::BAS_AlwaysBlockIndent)
+      return true;
     auto Next = Right.Next;
     if (Next && Next->is(tok::r_paren))
       Next = Next->Next;

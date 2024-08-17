@@ -97,6 +97,7 @@ struct FormatStyle {
     ///  ``Cpp11BracedListStyle`` is ``true``) and parentheses.
     /// \endnote
     BAS_BlockIndent,
+    BAS_AlwaysBlockIndent,
   };
 
   /// If ``true``, horizontally aligns arguments after an open bracket.

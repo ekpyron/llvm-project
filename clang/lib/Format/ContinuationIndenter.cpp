@@ -410,6 +410,11 @@ bool ContinuationIndenter::mustBreak(const LineState &State) {
          Style.ColumnLimit > 0)))) {
     return true;
   }
+  if (Style.AlignAfterOpenBracket == FormatStyle::BAS_AlwaysBlockIndent &&
+      Previous.is(tok::l_paren) &&
+      (getLengthToMatchingParen(Previous, State.Stack) + State.Column - 1 >
+       getColumnLimit(State)))
+    return true;
   if (CurrentState.BreakBeforeClosingBrace &&
       (Current.closesBlockOrBlockTypeList(Style) ||
        (Current.is(tok::r_brace) &&
@@ -1229,7 +1234,8 @@ unsigned ContinuationIndenter::addTokenOnNewLine(LineState &State,
 
   if (PreviousNonComment && PreviousNonComment->is(tok::l_paren)) {
     CurrentState.BreakBeforeClosingParen =
-        Style.AlignAfterOpenBracket == FormatStyle::BAS_BlockIndent;
+        (Style.AlignAfterOpenBracket == FormatStyle::BAS_BlockIndent ||
+         Style.AlignAfterOpenBracket == FormatStyle::BAS_AlwaysBlockIndent);
   }
 
   if (CurrentState.AvoidBinPacking) {
@@ -1361,7 +1367,8 @@ unsigned ContinuationIndenter::getNewLineColumn(const LineState &State) {
       State.Stack.size() > 1) {
     return State.Stack[State.Stack.size() - 2].LastSpace;
   }
-  if (Style.AlignAfterOpenBracket == FormatStyle::BAS_BlockIndent &&
+  if ((Style.AlignAfterOpenBracket == FormatStyle::BAS_BlockIndent ||
+       Style.AlignAfterOpenBracket == FormatStyle::BAS_AlwaysBlockIndent) &&
       (Current.is(tok::r_paren) ||
        (Current.is(tok::r_brace) && Current.MatchingParen &&
         Current.MatchingParen->is(BK_BracedInit))) &&
