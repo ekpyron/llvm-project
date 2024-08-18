@@ -410,8 +410,16 @@ bool ContinuationIndenter::mustBreak(const LineState &State) {
          Style.ColumnLimit > 0)))) {
     return true;
   }
+  auto isBlockIndentedInitLBrace = [&](const FormatToken &Token) {
+    if (!Style.Cpp11BracedListStyle || !Token.is(tok::l_brace))
+      return false;
+    if (!Token.MatchingParen ||
+        !Token.MatchingParen->isBlockIndentedInitRBrace(Style))
+      return false;
+    return true;
+  };
   if (Style.AlignAfterOpenBracket == FormatStyle::BAS_AlwaysBlockIndent &&
-      Previous.is(tok::l_paren) &&
+      (Previous.is(tok::l_paren) || isBlockIndentedInitLBrace(Previous)) &&
       (getLengthToMatchingParen(Previous, State.Stack) + State.Column - 1 >
        getColumnLimit(State)))
     return true;
